@@ -1,0 +1,3 @@
+(sym_lib_table
+  (lib (name papaya-rescue)(type Legacy)(uri ${KIPRJMOD}/papaya-rescue.lib)(options "")(descr ""))
+)
