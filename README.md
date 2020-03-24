@@ -17,6 +17,7 @@ Basically, I want to be as cool as the Gameboy folks. I want to get up on stage 
 * `player/` - Command-line players for .psg files (as exported by [AY Emulator](https://bulba.untergrund.net/emulator_e.htm) and [Fuse](http://fuse-emulator.sourceforge.net/)). Requires [pigpio](http://abyz.me.uk/rpi/pigpio/) to build.
   * `player/psg` - plays a single-AY track in .psg format. Run with `sudo ./psg somefile.psg`
   * `player/psg2` - plays a dual-AY track exported as two .psg files. Run with `sudo ./psg2 somefile1.psg somefile2.psg`
+* `server/` - Server software; see below
 
 ## Bill of materials
 
@@ -54,3 +55,13 @@ Technically this board doesn't qualify as a HAT, as it doesn't include the ident
 
 ## Mounting
 With socketed chips, the Raspberry Pi and papAYa combo fits neatly into a [SmartiPi Touch 2 case](https://thepihut.com/products/smartipi-touch-2) with a [15mm back cover](https://thepihut.com/products/smartipi-touch-2-back-cover), provided you use [11mm spacers](https://thepihut.com/products/raspberry-pi-hat-mounting-kit) rather than the slightly-taller ones that come with the touchscreen.
+
+## Server
+Rather than having each client program do its own low-level GPIO access (which typically requires running as root), the AY can be made available over a network service, running on TCP port 8912. Client software is in progress; see server/protocol.txt for details of the protocol.
+
+To build, run `make` from the `server` directory - this requires [pigpio](http://abyz.me.uk/rpi/pigpio/). Copy the resulting `server` executable to `/usr/local/sbin/papaya`, and run it under supervisor using a configuration file such as (in `/etc/supervisor/conf.d/papaya.conf`):
+
+    [program:papaya]
+    command=/usr/local/sbin/papaya
+    autostart=true
+    autorestart=true

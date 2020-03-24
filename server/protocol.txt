@@ -1,0 +1,81 @@
+papAYa protocol
+===============
+
+Server listens on TCP port 8912. Only one client may be connected at once.
+
+On successful connection, the server responds with the ASCII string "beep boop" followed by:
+
+* 1 byte: Protocol version (currently 0)
+* 1 byte: number of AY chips available
+
+All subsequent communication is packet based, with packets having the format:
+
+* 1 byte: identifier
+* 1 byte: number of following data bytes
+* n bytes: data
+
+Data is in network (big-endian) order. The server keeps a limited-size (64Kb) data buffer;
+communication will block when this is full, so clients are expected to keep count of the duration
+of sent data and not send data substantially faster than it will be consumed.
+
+Packets sent by the client:
+
+'O' (0x4f) - Open
+-----------------
+
+Required before sending any data. Sets clock speed and clears any existing data in the buffer.
+
+* 4 bytes: Clock frequency in Hz
+* 4 bytes: Heartbeat interval in microseconds (not currently implemented; set to 0)
+
+'R' (0x52) - Set registers
+--------------------------
+
+Adds a list of AY register writes to the buffer.
+
+* 1 byte: Chip number to write to (0-based)
+* followed by any number of repeats of:
+  * 1 byte: Register number
+  * 1 byte: Value to write
+
+'P' (0x50) - Pause
+------------------
+
+Adds a delay of defined duration to the buffer.
+
+* 4 bytes: Duration in microseconds
+
+'C' (0x43) - Close
+------------------
+
+Adds a close event to the buffer; when reached, all chips are silenced. Another 'Open' packet must
+be sent before any subsequent data is accepted.
+
+No payload (data length is 0).
+
+'S' (0x53) - Stop
+-----------------
+
+Instantly silence all chips and discard all buffered data. Another 'Open' packet must be sent
+before any subsequent data is accepted.
+
+No payload (data length is 0).
+
+
+Packets sent by the server:
+
+'c' (0x63) - Closed
+-------------------
+
+Sent after a close event has been reached.
+
+No payload (data length is 0).
+
+'t' (0x74) - Tick
+-----------------
+
+Not yet implemented. Will be sent periodically at the interval specified in the 'Open' packet;
+clients can use this to rate-limit the data they send, instead of keeping their own timer (which
+could potentially drift relative to the server).
+
+No payload (data length is 0).
