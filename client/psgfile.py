@@ -5,17 +5,13 @@ class PSGFile:
     class BadPSGFile(Exception):
         pass
 
-    def __init__(self, f):
-        if isinstance(f, str):
-            filename = f
-            with open(filename, mode='rb') as f:
-                self.data = f.read()
-        else:
+    def __init__(self, filename):
+        with open(filename, mode='rb') as f:
             self.data = f.read()
 
         header, = struct.unpack_from('4s', self.data, 0)
         if header != b'PSG\x1a':
-            raise PSGFile.BadPSGFile("File is not a valid PSG file")
+            raise PSGFile.BadPSGFile("%s: File is not a valid PSG file" % filename)
 
     def frames(self):
         # Read initial AY values from PSG file

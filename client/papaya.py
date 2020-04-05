@@ -43,6 +43,10 @@ class Papaya:
         close_msg = build_packet(b'C', b'')
         self.socket.sendall(close_msg)
 
+    def stop(self):
+        stop_msg = build_packet(b'S', b'')
+        self.socket.sendall(stop_msg)
+
     def wait_for_end(self):
         while True:
             data = self.socket.recv(2)
