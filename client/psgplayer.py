@@ -8,7 +8,7 @@ from papaya import SPECTRUM_AY_FREQUENCY
 # number of seconds of extra data to send ahead of current actual play time
 LATENCY = 1
 
-def player_thread(ay, psg_files, status):
+def player_thread(ay, psg_files, frame_rate, status):
     ay.open(SPECTRUM_AY_FREQUENCY)
     start_time = time.time()
 
@@ -25,8 +25,8 @@ def player_thread(ay, psg_files, status):
         for chip_num, regs in enumerate(frame):
             if regs:
                 ay.write(chip_num, regs)
-        ay.pause(20000)
-        queued_time = frame_num * 0.02
+        ay.pause(frame_rate)
+        queued_time = frame_rate / 1_000_000 * frame_num
         played_time = time.time() - start_time
         backlog = queued_time - played_time
         if backlog > LATENCY:
@@ -39,11 +39,13 @@ def player_thread(ay, psg_files, status):
 
 
 class PSGPlayer:
-    def __init__(self, ay, files):
+    def __init__(self, ay, files, frame_rate=20000):
         self.ay = ay
         self.psg_files = []
         for filename in files:
             self.psg_files.append(PSGFile(filename))
+
+        self.frame_rate = frame_rate
 
         if ay.chip_count < len(self.psg_files):
             print("warning: trying to play %d files but only %d chips available" % (len(self.psg_files), ay.chip_count))
@@ -56,7 +58,7 @@ class PSGPlayer:
         self.thread = None
 
     def start(self):
-        self.thread = threading.Thread(target=player_thread, args=(self.ay, self.psg_files, self.status))
+        self.thread = threading.Thread(target=player_thread, args=(self.ay, self.psg_files, self.frame_rate, self.status))
         self.thread.start()
 
     def stop(self):
