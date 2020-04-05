@@ -109,7 +109,7 @@ int main(int argc, char *argv[]) {
         }
 
         /* write handshake message */
-        if (send(client_fd, "beep boop\x00\x01", 11, 0) < 0) {
+        if (send(client_fd, "beep boop\x00\x02", 11, 0) < 0) {
             perror("error writing to socket");
             exit(EXIT_FAILURE);
         }

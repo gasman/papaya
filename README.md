@@ -68,4 +68,10 @@ To build, run `make` from the `server` directory - this requires [pigpio](http:/
     autostart=true
     autorestart=true
 
-`client/psg.py` is a client program for playing .psg files, written in Python - run with: `./psg.py somefile.psg`
+`client/psg.py` is a client program for playing .psg files, written in Python - run with:
+
+    ./psg.py somefile.psg
+
+Or, for multiple chips:
+
+    ./psg.py somefile1.psg somefile2.psg
