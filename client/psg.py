@@ -8,6 +8,10 @@ from papaya import Papaya, SPECTRUM_AY_FREQUENCY
 from psgfile import PSGFile
 
 
+# number of seconds of extra data to send ahead of current actual play time
+LATENCY = 1
+
+
 if len(sys.argv) < 2:
     print("Usage: psg.py <psgfile> [psgfile...]")
     sys.exit()
@@ -26,12 +30,20 @@ ay.open(SPECTRUM_AY_FREQUENCY)
 if ay.chip_count < len(psg_files):
     print("warning: trying to play %d files but only %d chips available" % (len(psg_files), ay.chip_count))
 
-for frame in zip_longest(*(psg.frames() for psg in psg_files), fillvalue=[]):
+start_time = time.time()
+
+for frame_num, frame in enumerate(
+    zip_longest(*(psg.frames() for psg in psg_files), fillvalue=[])
+):
     for chip_num, regs in enumerate(frame):
         if regs:
             ay.write(chip_num, regs)
     ay.pause(20000)
-    time.sleep(0.01)
+    queued_time = frame_num * 0.02
+    played_time = time.time() - start_time
+    backlog = queued_time - played_time
+    if backlog > LATENCY:
+        time.sleep(backlog - LATENCY)
 
 ay.finish()
 ay.wait_for_end()
