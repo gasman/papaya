@@ -47,11 +47,11 @@ For the dual-AY board:
 ## Design considerations
 The AY data bus (pins DA0-DA7) is connected directly to GPIO pins: 17, 27, 22, 10, 9, 11, 5, 6. The AY chip is a 5V device while the Raspberry Pi runs on 3.3V, but since the data direction is write-only and the AY accepts anything over 2.5V as logic high, no level conversion is needed.
 
-For the first AY chip, BC1 is on GPIO pin 13 and BDIR is on pin 19. On the dual AY board, the second chip's BC1 is on pin 20 and BDIR is on pin 21. The clock signal is provided by the Raspberry Pi's hardware clock on GPIO pin 4.
+For the first AY chip, BC1 is on GPIO pin 13 and BDIR is on pin 19. On the dual AY board, the second chip's BC1 is on pin 20 and BDIR is on pin 21. The clock signal is provided by the Raspberry Pi's hardware clock on GPIO pin 4. GPIO pin 26 is connected to RESET on both chips (NOTE: this is not implemented on the PCB yet).
 
 Audio output is in ACB stereo format: channel A (of both chips) is mixed to the left, channel B to the right and C in the centre.
 
-Note that AY-3-8912A chips (which are the majority of those available on eBay / AliExpress) do not function correctly, for as-yet-undetermined reasons; the noise generator doesn't get triggered. (See [the side-by-side comparison](https://twitter.com/gasmanic/status/1227395760758624256).) This doesn't seem to be due to the 5V / 3.3V mismatch - the same behaviour was seen on an earlier Arduino-based prototype too.
+Some or all AY-3-8912A chips have a quirk where the RESET line must be toggled low then high in order to activate the noise generator - it does not function immediately on power-on. This is implemented in the software, but the PCB has not yet been updated to support this (the RESET line is held high instead) and so will currently only work with AY-3-8912 (not 8912A) chips.
 
 Technically this board doesn't qualify as a HAT, as it doesn't include the identifying EPROM.
 

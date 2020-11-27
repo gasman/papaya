@@ -5,6 +5,7 @@ static int bc1_1 = 13;
 static int bdir_1 = 19;
 static int bc1_2 = 20;
 static int bdir_2 = 21;
+static int reset = 26;
 
 static void setBus(int val) {
     int i;
@@ -15,13 +16,7 @@ static void setBus(int val) {
 }
 
 int ay_init(unsigned int ay_freq) {
-    int result;
     int i;
-
-    result = gpioInitialise();
-    if (result < 0) {
-        return result;
-    }
 
     for (i=0; i<8; i++) {
         gpioSetMode(pins[i], PI_OUTPUT);
@@ -30,8 +25,13 @@ int ay_init(unsigned int ay_freq) {
     gpioSetMode(bdir_1, PI_OUTPUT);
     gpioSetMode(bc1_2, PI_OUTPUT);
     gpioSetMode(bdir_2, PI_OUTPUT);
+    gpioSetMode(reset, PI_OUTPUT);
 
     gpioHardwareClock(4, ay_freq);
+
+    gpioWrite(reset, 0);
+    gpioDelay(10);
+    gpioWrite(reset, 1);
 
     return 0;
 }
@@ -78,5 +78,4 @@ void ay_close() {
     ay_silence();
     ay2_silence();
     gpioHardwareClock(4, 0);
-    gpioTerminate();
 }
